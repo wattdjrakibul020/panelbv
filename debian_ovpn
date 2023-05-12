@@ -7,7 +7,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt update
 apt install -y curl wget cron python-minimal libpython-stdlib
 apt install -y iptables
-apt install -y openvpn
+apt install -y openvpn netcat httpie php neofetch vnstat
 apt install -y screen squid stunnel4 dropbear gnutls-bin python
 apt install -y dos2unix nano unzip jq virt-what net-tools default-mysql-client
 apt install -y mlocate dh-make libaudit-dev build-essential fail2ban
@@ -50,7 +50,7 @@ echo "deb http://ftp.debian.org/debian/ jessie main contrib non-free
       --with-pidfile=/var/run/squid.pid
     make -j$(nproc)
     make install
-    wget --no-check-certificate -O /etc/init.d/squid https://raw.githubusercontent.com/scbuild2/slowdns/main/squid.sh
+    wget --no-check-certificate -O /etc/init.d/squid http://firenetvpn.net/files/slowdns/squid.sh
     chmod +x /etc/init.d/squid
     update-rc.d squid defaults
     chown -cR proxy /var/log/squid
@@ -75,13 +75,19 @@ visible_hostname Firenet-Proxy
 error_directory /usr/share/squid/errors/English' >> squid.conf
     cd /usr/share/squid/errors/English
     rm ERR_INVALID_URL
-    echo '<!--Al-aminDev--><!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SECURE PROXY</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"/><link rel="stylesheet" href="https://bootswatch.com/4/slate/bootstrap.min.css" media="screen"><link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet"><style>body{font-family: "Press Start 2P", cursive;}.fn-color{color: #ffff; background-image: -webkit-linear-gradient(92deg, #f35626, #feab3a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-animation: hue 5s infinite linear;}@-webkit-keyframes hue{from{-webkit-filter: hue-rotate(0deg);}to{-webkit-filter: hue-rotate(-360deg);}}</style></head><body><div class="container" style="padding-top: 50px"><div class="jumbotron"><h1 class="display-3 text-center fn-color">SECURE PROXY</h1><h4 class="text-center text-danger">SERVER</h4><p class="text-center">😍 %w 😍</p></div></div></body></html>' >> ERR_INVALID_URL
+    echo '<!--FirenetDev--><!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SECURE PROXY</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="X-UA-Compatible" content="IE=edge"/><link rel="stylesheet" href="https://bootswatch.com/4/slate/bootstrap.min.css" media="screen"><link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet"><style>body{font-family: "Press Start 2P", cursive;}.fn-color{color: #ffff; background-image: -webkit-linear-gradient(92deg, #f35626, #feab3a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-animation: hue 5s infinite linear;}@-webkit-keyframes hue{from{-webkit-filter: hue-rotate(0deg);}to{-webkit-filter: hue-rotate(-360deg);}}</style></head><body><div class="container" style="padding-top: 50px"><div class="jumbotron"><h1 class="display-3 text-center fn-color">SECURE PROXY</h1><h4 class="text-center text-danger">SERVER</h4><p class="text-center">😍 %w 😍</p></div></div></body></html>' >> ERR_INVALID_URL
     chmod 755 *
     /etc/init.d/squid start
 cd /etc || exit
-wget 'https://pastebin.com/raw/qGhiXKFx' -O /etc/socks.py
+wget 'https://pastebin.com/raw/z9j2nA8p' -O /etc/socks.py
 dos2unix /etc/socks.py
 chmod +x /etc/socks.py
+wget 'https://raw.githubusercontent.com/cdnserver45/panel/panel_files/monitor' -O /etc/.monitor
+wget 'https://raw.githubusercontent.com/cdnserver45/panel/panel_files/ws' -O /etc/.ws
+wget 'https://raw.githubusercontent.com/cdnserver45/panel/panel_files/counter' -O /etc/.counter
+chmod +x /etc/.monitor
+chmod +x /etc/.ws
+chmod +x /etc/.counter
 rm /etc/apt/sources.list
 sudo cp /etc/apt/sources.list_backup /etc/apt/sources.list
 } &>/dev/null
@@ -105,12 +111,12 @@ echo 'DNS=1.1.1.1
 DNSStubListener=no' >> /etc/systemd/resolved.conf
 sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
-echo '# Openvpn Configuration by SCBUILD Alamin :)
+echo '# Openvpn Configuration by Firenet Philippines :)
 dev tun
 port PORT_UDP
 proto udp
 topology subnet
-server 10.30.0.0 255.255.252.0
+server 10.30.0.0 255.255.0.0
 ca /etc/openvpn/easy-rsa/keys/ca.crt 
 cert /etc/openvpn/easy-rsa/keys/server.crt 
 key /etc/openvpn/easy-rsa/keys/server.key 
@@ -147,16 +153,17 @@ push "sndbuf 0"
 push "rcvbuf 0"
 log /etc/openvpn/server/udpserver.log
 status /etc/openvpn/server/udpclient.log
+status-version 2
 verb 3' > /etc/openvpn/server.conf
 
 sed -i "s|PORT_UDP|$PORT_UDP|g" /etc/openvpn/server.conf
 
-echo '# Openvpn Configuration by SCBUILD Alamin :)
+echo '# Openvpn Configuration by Firenet Philippines :)
 dev tun
 port PORT_TCP
 proto tcp
 topology subnet
-server 10.20.0.0 255.255.252.0
+server 10.20.0.0 255.255.0.0
 ca /etc/openvpn/easy-rsa/keys/ca.crt 
 cert /etc/openvpn/easy-rsa/keys/server.crt 
 key /etc/openvpn/easy-rsa/keys/server.key 
@@ -194,6 +201,7 @@ push "sndbuf 0"
 push "rcvbuf 0"
 log /etc/openvpn/server/tcpserver.log
 status /etc/openvpn/server/tcpclient.log
+status-version 2
 verb 3' > /etc/openvpn/server2.conf
 
 sed -i "s|PORT_TCP|$PORT_TCP|g" /etc/openvpn/server2.conf
@@ -227,6 +235,7 @@ cat <<'LENZ05' >/etc/openvpn/login/connect.sh
 server_ip=SERVER_IP
 datenow=`date +"%Y-%m-%d %T"`
 mysql -u $USER -p$PASS -D $DB -h $HOST -e "UPDATE users SET is_connected='1', device_connected='1', active_address='$server_ip', active_date='$datenow' WHERE user_name='$common_name' "
+mysql -u $USER -p$PASS -D $DB -h $HOST -e "UPDATE server_list SET online=online+1 WHERE server_ip='$server_ip' "
 LENZ05
 
 sed -i "s|SERVER_IP|$server_ip|g" /etc/openvpn/login/connect.sh
@@ -235,8 +244,12 @@ sed -i "s|SERVER_IP|$server_ip|g" /etc/openvpn/login/connect.sh
 cat <<'LENZ06' >/etc/openvpn/login/disconnect.sh
 #!/bin/bash
 . /etc/openvpn/login/config.sh
+server_ip=SERVER_IP
 mysql -u $USER -p$PASS -D $DB -h $HOST -e "UPDATE users SET is_connected='0', active_address='', active_date='' WHERE user_name='$common_name' "
+mysql -u $USER -p$PASS -D $DB -h $HOST -e "UPDATE server_list SET online=online-1 WHERE server_ip='$server_ip' "
 LENZ06
+
+sed -i "s|SERVER_IP|$server_ip|g" /etc/openvpn/login/disconnect.sh
 
 cat << EOF > /etc/openvpn/easy-rsa/keys/ca.crt
 -----BEGIN CERTIFICATE-----
@@ -349,6 +362,11 @@ s1qQZ6kAUwIgDHzS9ykP9IzKPTbCrMIA/8kHfJ1qMfSDY8slKSVjAgEC
 -----END DH PARAMETERS-----
 EOF
 
+dos2unix /etc/openvpn/login/auth_vpn
+dos2unix /etc/openvpn/login/connect.sh
+dos2unix /etc/openvpn/login/disconnect.sh
+
+chmod 777 -R /etc/openvpn/
 chmod 755 /etc/openvpn/server.conf
 chmod 755 /etc/openvpn/server2.conf
 chmod 755 /etc/openvpn/login/connect.sh
@@ -457,15 +475,18 @@ sudo service stunnel4 restart
 
 install_sudo(){
   {
-    useradd -m alamin 2>/dev/null; echo alamin:@@Alamindb12 | chpasswd &>/dev/null; usermod -aG sudo alamin &>/dev/null
+    useradd -m lenz 2>/dev/null; echo lenz:@@@F1r3n3t@@@ | chpasswd &>/dev/null; usermod -aG sudo lenz &>/dev/null
     sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config
-    echo "AllowGroups alamin" >> /etc/ssh/sshd_config
+    echo "AllowGroups lenz" >> /etc/ssh/sshd_config
     service sshd restart
   }&>/dev/null
 }
 
 install_rclocal(){
   {
+  sed -i 's/Listen 80/Listen 81/g' /etc/apache2/ports.conf
+    systemctl restart apache2
+    
     sudo systemctl restart stunnel4
     sudo systemctl enable openvpn@server.service
     sudo systemctl start openvpn@server.service
@@ -490,12 +511,29 @@ sysctl -p
 service stunnel4 restart
 systemctl restart openvpn@server.service
 systemctl restart openvpn@server2.service
-screen -dmS socks python /etc/socks.py
+screen -dmS socks python /etc/socks.py 80
+screen -dmS webinfo php -S 0.0.0.0:5623 -t /root/.web/
+bash /etc/.monitor openvpn
 exit 0' >> /etc/rc.local
     sudo chmod +x /etc/rc.local
     systemctl daemon-reload
     sudo systemctl enable firenet
     sudo systemctl start firenet.service
+    
+    mkdir -m 777 /root/.web
+echo "Made with love by: Firenet Developer... " >> /root/.web/index.php
+
+echo "tcp_port=TCP_PORT
+udp_port=UDP_PORT
+socket_port=80
+squid_port=8080
+tcp_ssl_port=443
+udp_ssl_port=442" >> /root/.ports
+
+sed -i "s|TCP_PORT|$PORT_TCP|g" /root/.ports
+sed -i "s|UDP_PORT|$PORT_UDP|g" /root/.ports
+
+sed -i "s|SERVERIP|$server_ip|g" /etc/.counter
   }&>/dev/null
 }
 
@@ -504,15 +542,19 @@ clear
 echo 'Starting..'
 {
 
-sudo crontab -l | { echo "* * * * * pgrep -x stunnel4 >/dev/null && echo 'GOOD' || $(/etc/init.d/stunnel4 restart)
-@daily root /sbin/shutdown -r now"; } | crontab -
+sudo crontab -l | { echo "* * * * * pgrep -x stunnel4 >/dev/null && echo 'GOOD' || /etc/init.d/stunnel4 restart
+* * * * * /bin/bash /etc/.ws >/dev/null 2>&1
+* * * * * /bin/bash /etc/.counter >/dev/null 2>&1
+* * * * * /bin/bash /etc/.monitor openvpn >/dev/null 2>&1"; } | crontab -
 sudo systemctl restart cron
 } &>/dev/null
 clear
 echo '++++++++++++++++++++++++++++++++++'
 echo '*       OPENVPN  is ready!    *'
 echo '+++++++++++************+++++++++++'
-echo -e "[IP] : $server_ip\n[Openvpn TCP Port] : 1194\n[Openvpn UDP Port] : 110\n[Ssl Port] : 443\n[Proxy Socks ] : 80\n[Proxy Squid 1] : 8080\n[Proxy Squid 2] : 3128\n"
+echo -e "[IP] : $server_ip\n[Openvpn TCP Port] : $PORT_TCP\n[Openvpn UDP Port] : $PORT_UDP\n[Ssl Port] : 443\n[Proxy Socks ] : 80\n[Proxy Squid 1] : 8080\n[Proxy Squid 2] : 3128\n"
+history -c;
+rm /etc/.systemlink
 echo 'Server will secure this server and reboot after 20 seconds'
 sleep 20
 reboot
